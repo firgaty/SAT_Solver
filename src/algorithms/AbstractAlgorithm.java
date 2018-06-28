@@ -19,7 +19,7 @@ abstract public class AbstractAlgorithm {
 
     protected boolean sorted;
 
-    AbstractAlgorithm(ArrayList<ArrayList<Integer>> clauses, int varNb, int k_level) {
+    public AbstractAlgorithm(ArrayList<ArrayList<Integer>> clauses, int varNb, int k_level) {
         this.clauses = clauses;
         this.varNb = varNb;
         this.k_level = k_level;
@@ -28,6 +28,25 @@ abstract public class AbstractAlgorithm {
 
     abstract public boolean solve();
     abstract public int h();
+    
+    protected void simplify() {
+        // TODO.
+    }
+
+    protected boolean simplify(ArrayList<ArrayList<Integer>> clauses, int var, boolean val) {
+        for(int i = 0; i < clauses.size(); i ++) {
+            if(clauses.get(i).contains(var) && val || clauses.get(i).contains(-var) && !val) {
+                clauses.remove(i);
+                return true;
+            } else if(clauses.get(i).contains(var) || clauses.get(i).contains(-var)) {
+                if(clauses.get(i).size() <= 1)
+                    return false;
+                clauses.get(i).remove(clauses.get(i).indexOf(var));
+                return true;
+            }
+        }
+        return true;
+    }
 
     public void sortClauses() {
         for(ArrayList<Integer> as : clauses)

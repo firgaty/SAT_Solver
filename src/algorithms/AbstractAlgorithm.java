@@ -3,6 +3,7 @@ package algorithms;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import parselib.Main;
 
@@ -11,107 +12,31 @@ import parselib.Main;
  */
 abstract public class AbstractAlgorithm {
 
-    protected ArrayList<ArrayList<Integer>> clauses;
-    protected HashMap<Integer, Boolean> values;
+    protected ClauseArray clauses;
 
-    int varNb;
-    int k_level;
-
-    protected boolean sorted;
-
-    public AbstractAlgorithm(ArrayList<ArrayList<Integer>> clauses, int varNb, int k_level) {
+    public AbstractAlgorithm(ClauseArray clauses) {
         this.clauses = clauses;
-        this.varNb = varNb;
-        this.k_level = k_level;
-        this.values = new HashMap<>(varNb);
+    }
+
+    public AbstractAlgorithm(ArrayList<ArrayList<Integer>> clauses, HashMap<Integer, Boolean> values, HashMap<Integer, Counter> valuesCount, int varNb, int k_level) {
+        this.clauses = new ClauseArray(clauses, varNb, k_level);
     }
 
     abstract public boolean solve();
-    abstract public int h();
     
-    protected void simplify() {
-        // TODO.
-    }
-
-    protected boolean simplify(ArrayList<ArrayList<Integer>> clauses, int var, boolean val) {
-        for(int i = 0; i < clauses.size(); i ++) {
-            if(clauses.get(i).contains(var) && val || clauses.get(i).contains(-var) && !val) {
-                clauses.remove(i);
-                return true;
-            } else if(clauses.get(i).contains(var) || clauses.get(i).contains(-var)) {
-                if(clauses.get(i).size() <= 1)
-                    return false;
-                clauses.get(i).remove(clauses.get(i).indexOf(var));
-                return true;
-            }
+    public Integer h(Flag flag) {
+        switch (flag) {
+        case FirstUnique:
+            return clauses.firstUnique();
+            break;
+        case MostRepresentedUnique:
+            return clauses.mostRepresentedUnique();
+            break;
+        case MostRepresentedVar:
+            return clauses.getMostRepresented();
+            break;
+        default:
+            Main.err("Invalid Flag", 300);
         }
-        return true;
-    }
-
-    public void sortClauses() {
-        for(ArrayList<Integer> as : clauses)
-            as.sort((a, b) -> Integer.compare(a, b));
-        clauses.sort((a, b) -> Integer.compare(a.size(), b.size()));
-
-        if(Main.getVerbose())
-            System.out.println("Sorted.");
-    }
-    
-    public ArrayList<Integer> getSmallestClause() {
-        if(sorted) return clauses.get(0);
-        
-        int min = clauses.get(0).size();
-        int index = 0;
-
-        for(int i = 1; i < clauses.size(); i ++) {
-            if(clauses.get(i).size() < min) {
-                min = clauses.get(i).size();
-                index = i;
-            }
-        }
-
-        if(Main.getVerbose()) {
-            System.out.println("Smallest clause : " + index + " - size : " + min);
-            printClause(clauses.get(index));
-        }
-
-        return clauses.get(index);
-    }
-
-    public ArrayList<Integer> getBiggestClause() {
-        if (sorted)
-            return clauses.get(clauses.size() - 1);
-
-        int max = clauses.get(0).size();
-        int index = 0;
-
-        for (int i = 1; i < clauses.size(); i++) {
-            if (clauses.get(i).size() > max) {
-                max = clauses.get(i).size();
-                index = i;
-            }
-        }
-
-        if (Main.getVerbose()) {
-            System.out.println("Biggest clause : " + index + " - size : " + max);
-            printClause(clauses.get(index));
-        }
-
-        return clauses.get(index);
-    }
-
-    public static void printClause(ArrayList<Integer> clause) {
-        String str = "[";
-        
-        for(int c : clause)
-            str += c + ", ";
-        
-        str += "]";
-
-        System.out.println(str);
-    }
-
-    public boolean isSorted() {
-        return sorted;
     }
 }

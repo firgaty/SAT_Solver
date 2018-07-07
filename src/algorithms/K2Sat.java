@@ -18,31 +18,27 @@ public class K2Sat extends AbstractAlgorithm {
 
     @Override
     public boolean solve() {
-        for(ArrayList<Integer> as : clauses) {
-            if(as.size() == 1) {
-                int var = as.get(0);
-                if (var > 0)
+        ArrayList<ArrayList<Integer>> clauses = this.clauses;
+
+        while(clauses.size() > 0) {
+            while (clauses.size() > 0) {
+                Integer var = h(Flag.FirstUnique);
+                if(var == null) break;
+                if (var > 0) {
                     values.put(var, true);
-                else values.put(-var, false);
+                } else {
+                    values.put(-var, false);
+                }
                 if(!simplify(clauses, var, values.get(var)))
                     return false;
+            
             }
-        }
 
+        }
         return false;
     }
 
     protected boolean tree(ArrayList<ArrayList<Integer>> clauses, int var, boolean val) {
         
-    }
-
-    @Override
-    public int h() {return 0;}
-
-    public AbstractAlgorithm(ArrayList<ArrayList<Integer>> clauses, int varNb, int k_level) {
-        this.clauses = clauses;
-        this.varNb = varNb;
-        this.k_level = k_level;
-        this.values = new HashMap<>(varNb);
     }
 }

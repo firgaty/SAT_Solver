@@ -3,6 +3,9 @@ package parselib;
 import java.io.BufferedWriter;
 import java.lang.ClassCastException;
 import java.util.ArrayList;
+import java.util.HashSet;
+
+import algorithms.ClauseArray;
 
 /**
  * Parser
@@ -15,7 +18,7 @@ public class Parser {
 
     protected long clauseNb;
 
-    protected ArrayList<ArrayList<Integer>> clauses;
+    protected ArrayList<HashSet<Integer>> clauses;
 
     public Parser(LookAhead1 l, BufferedWriter bw) {
         this.bw = bw;
@@ -35,7 +38,7 @@ public class Parser {
     public void blockLine() throws Exception {
         Token t = reader.get();
         Symbol sym = t.getSymbol();
-        ArrayList<Integer> clause = null;
+        HashSet<Integer> clause = null;
 
         switch(sym) {
             case COMMENT : commentLine(); break;
@@ -89,10 +92,10 @@ public class Parser {
         bw.write(line);
     }
 
-    private ArrayList<Integer> clause() throws Exception {
+    private HashSet<Integer> clause() throws Exception {
         clauseNb ++;
 
-        ArrayList<Integer> array = new ArrayList<>();
+        HashSet<Integer> array = new ArrayList<>();
 
         Symbol sym = reader.get().getSymbol();
 
@@ -126,10 +129,10 @@ public class Parser {
         if (Main.getVerbose())
             System.out.println(clause + "0");
 
-        return array;
+        return new Clause(array);
     }
 
-    public ArrayList<ArrayList<Integer>> getClauses() {
+    public ClauseArray getClauses() {
         return clauses;
     }
 }

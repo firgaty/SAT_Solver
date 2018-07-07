@@ -1,4 +1,4 @@
-package algorithms;
+package util;
 
 public class Counter {
     int val;
@@ -27,6 +27,8 @@ public class Counter {
 
     public int decrement() {
         this.val--;
+        if (val < 0)
+            
         return val;
     }
 

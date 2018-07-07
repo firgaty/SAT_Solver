@@ -130,7 +130,7 @@ public class Main {
 
     private static void options(String str) {
         if(str.length() < 2)
-            Main.err("Invalid option.", 12);
+            ErrPrint.err("Invalid option.", 12);
         for(int i = 1; i < str.length(); i++) {
             switch (str.charAt(i)) {
                 case 'v': verbose = true;
@@ -138,15 +138,10 @@ public class Main {
                     break;
             
                 default:
-                    Main.err("Invalid option : " + str.charAt(i), 13);
+                    ErrPrint.err("Invalid option : " + str.charAt(i), 13);
                     break;
             }
         }
-    }
-
-    public static void err(String comment, int exitId) {
-        System.err.println(comment);
-        System.exit(exitId);
     }
 
     /**

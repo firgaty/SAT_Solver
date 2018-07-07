@@ -1,14 +1,17 @@
+package util.containers;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import util.Counter;
 
 import parselib.Main;
 
 public /**
  * ClauseArray
  */
-public class ClauseArray extends ArrayList<Set<Integer>> {
-    static final long SerialVersionUID = 1293102117;
+public class ClauseArray extends ArrayList<Clause> {
+    static final long SerialVersionUID = 1293117;
 
     protected HashMap<Integer, Boolean> values;
     protected HashMap<Integer, Counter> valuesCount;
@@ -31,7 +34,7 @@ public class ClauseArray extends ArrayList<Set<Integer>> {
         initialized = false;
     }
 
-    public ClauseArray(ArrayList<Set<Integer>> cl, int varNb, int k_level) {
+    public ClauseArray(ArrayList<Clause> cl, int varNb, int k_level) {
         super(cl);
         this.varNb = varNb;
         this.k_level = k_level;
@@ -42,7 +45,7 @@ public class ClauseArray extends ArrayList<Set<Integer>> {
         initialized = false;
     }
 
-    public ClauseArray(ArrayList<Set<Integer>> cl, int varNb, int k_level, HashMap<Integer, Boolean> values, HashMap<Integer, Counter> valuesCount, boolean sorted, boolean counted, boolean initialized) {
+    public ClauseArray(ArrayList<Clause> cl, int varNb, int k_level, HashMap<Integer, Boolean> values, HashMap<Integer, Counter> valuesCount, boolean sorted, boolean counted, boolean initialized) {
         super(cl);
         this.varNb = varNb;
         this.k_level = k_level;
@@ -54,10 +57,10 @@ public class ClauseArray extends ArrayList<Set<Integer>> {
     }
 
     public ClauseArray clone() {
-        ArrayList<ArrayList<Integer>> clausesClone = new ArrayList<>();
+        ArrayList<Clause> clausesClone = new ArrayList<>();
 
-        for (Set<Integer> item : clauses)
-            clauseClone.add(item.clone());
+        for (Clause c : this)
+            clauseClone.add(c.clone());
 
         return new ClauseArray(clausesClone, values.clone(), valuesCount.clone(), varNb, k_level, sorted, counted);
     }
@@ -65,29 +68,37 @@ public class ClauseArray extends ArrayList<Set<Integer>> {
     public void initialize() {
         if(initialized) return;
 
+        values = new HashMap<>();
+        valuesCount = new HashMap<>();
+
         int max = 0;
 
-        for(Clause c : this) {
-            if(c.size() > max) max = c.size();
-            for(int i : c) {
-                incrementValue(i);
+        for(int i = 0; i < this.size; i ++) {
+            if(this.get(i).isAlwaysTrue()) {
+                this.remove(i);
+                i --;
+                continue;
+            }
+            if(this.get(i).size() > max) max = this.get(i).size();
+            for(int j : this.get(i)) {
+                incrementValue(j);
             }
         }
 
         counted = true;
         this.k_level = max;
-        simplify(clauses, var, val);
+        simplify(this, var, val);
         initialized = true;
     }
 
-    public ClauseArray modifiedClone(int var, boolean b) {
+    public ClauseArray modifiedClone(int var, boolean val) {
         ClauseArray clone = clone();
         clone.simplify(var, val);
         return clone;
     }
 
-    public boolean simplify(int var, boolean b) {
-        simplify(this, var, b);
+    public boolean simplify(int var, boolean val) {
+        simplify(this, var, val);
     }
 
     public boolean simplify(ClauseArray clauses, int var, boolean val) {
@@ -113,12 +124,12 @@ public class ClauseArray extends ArrayList<Set<Integer>> {
         this.values.remove(var);
     }
 
-    public setVar(int var, Boolean b) {
+    public setVar(int var, Boolean val) {
         if(!values.containsKey(var)) {
             if(Main.getVerbose())
                 System.out.println("Value not contained.");
         } else
-            values.replace(var, b);
+            values.replace(var, val);
     }
 
     public boolean varExists(int var) {
@@ -126,15 +137,15 @@ public class ClauseArray extends ArrayList<Set<Integer>> {
     }
 
     protected void mapVars() {
-        for (ArrayList<Integer> as : clauses)
-            for (int i : as) 
+        for (Clause c : this)
+            for (int i : c) 
                 if(!values.containsKey(i))
                     values.put(i, null);
     }
 
     public void countValues() {
-        for (ArrayList<Integer> as : clauses)
-            for (int i : as)
+        for (Clause c : this)
+            for (int i : c)
                 incrementValue(i);
         counted = true;
     }
@@ -151,57 +162,58 @@ public class ClauseArray extends ArrayList<Set<Integer>> {
         }
     }
 
-    public void sortClauses() {
-        for (ArrayList<Integer> as : clauses)
-            as.sort((a, b) -> Integer.compare(a, b));
-        clauses.sort((a, b) -> Integer.compare(a.size(), b.size()));
+    @Override
+    public void sort() {
+        this.sort((a, b) -> Integer.compare(a.size(), b.size()));
 
         if (Main.getVerbose())
             System.out.println("Sorted.");
+
+        sorted = true;
     }
 
-    public ArrayList<Integer> getSmallestClause() {
+    public Clause getSmallestClause() {
         if (sorted)
-            return clauses.get(0);
+            return this.get(0);
 
-        int min = clauses.get(0).size();
+        int min = this.get(0).size();
         int index = 0;
 
-        for (int i = 1; i < clauses.size(); i++) {
-            if (clauses.get(i).size() < min) {
-                min = clauses.get(i).size();
+        for (int i = 1; i < this.size(); i++) {
+            if (this.get(i).size() < min) {
+                min = this.get(i).size();
                 index = i;
             }
         }
 
         if (Main.getVerbose()) {
             System.out.println("Smallest clause : " + index + " - size : " + min);
-            printClause(clauses.get(index));
+            printClause(this.get(index));
         }
 
-        return clauses.get(index);
+        return this.get(index);
     }
 
-    public ArrayList<Integer> getBiggestClause() {
+    public Clause getBiggestClause() {
         if (sorted)
-            return clauses.get(clauses.size() - 1);
+            return this.get(this.size() - 1);
 
-        int max = clauses.get(0).size();
+        int max = this.get(0).size();
         int index = 0;
 
-        for (int i = 1; i < clauses.size(); i++) {
-            if (clauses.get(i).size() > max) {
-                max = clauses.get(i).size();
+        for (int i = 1; i < this.size(); i++) {
+            if (this.get(i).size() > max) {
+                max = this.get(i).size();
                 index = i;
             }
         }
 
         if (Main.getVerbose()) {
             System.out.println("Biggest clause : " + index + " - size : " + max);
-            printClause(clauses.get(index));
+            printClause(this.get(index));
         }
 
-        return clauses.get(index);
+        return this.get(index);
     }
 
     public int getMostRepresented() {
@@ -253,29 +265,29 @@ public class ClauseArray extends ArrayList<Set<Integer>> {
 
     public Integer firstUnique() {
         if (!sorted)
-            sortClauses();
+            sort();
 
-        for (ArrayList<Integer> as : clauses)
-            if (as.size() == 1)
-                return as.get(0);
+        for (Clause c : this)
+            if (c.size() == 1)
+                return c.get(0);
         return null;
     }
 
     public Integer mostRepresentedUnique() {
         if (!sorted)
-            sortClauses();
+            sort();
 
         HashMap<Integer, Counter> uniques = new HashMap<>();
 
-        for(ArrayList<Integer> cs : clauses) {
-            if(cs.size() > 1) break;
-            incrementValue(cs.get(0), uniques);
+        for(Clause c : this) {
+            if(c.size() > 1) break;
+            incrementValue(c.get(0), uniques);
         }
 
         return getMostRepresented(uniques);
     }
 
-    public static void printClause(ArrayList<Integer> clause) {
+    public static void printClause(Clause clause) {
         String str = "[";
 
         for (int c : clause)
@@ -305,22 +317,8 @@ public class ClauseArray extends ArrayList<Set<Integer>> {
         return valuesCount;
     }
 
-    public ArrayList<ArrayList<Integer>> getClauses() {
-        return clauses;
-    }
-
-    public void setClauses(ArrayList<ArrayList<Integer>> css) {
-        this.clauses = css;
-        sorted = false;
-    }
-
-    public void addClause(ArrayList<Integer> cs) {
-        this.clauses.add(cs);
-        sorted = false;
-    }
-
-    public void removeClause(int index) {
-        this.clauses.remove(index);
+    public void remove(int index) {
+        super.remove(index);
         sorted = false;
     }
 
@@ -328,20 +326,23 @@ public class ClauseArray extends ArrayList<Set<Integer>> {
         if(!valuesCount.containsKey(var))
             return;
 
-        for(ArrayList<Integer> cs : clauses)
-            for(int i = 0; i < cs.size(); i ++)
-                if(cs.get(i) == var)
-                    cs.remove(i);
+        for(Clause c : this)
+            for(int i = 0; i < c.size(); i ++)
+                if(c.get(i) == var)
+                    c.remove(i);
 
         valuesCount.get(var).reset();
         sorted = false;
     }
 
-    public int clauseArraySize() {
-        return clauses.size();
-    }
-
-    public ArrayList<Integer> getClause(int n) {
-        return clauses.get(n);
+    @Override
+    public void add(Clause c) {
+        if(c.isAlwaysTrue())
+            return;
+        if(c.size() > k_level)
+            k_level = c.size();
+        for(int i : c)
+            this.valuesCount.get(i).decrement();
+        super.add(c);
     }
 }

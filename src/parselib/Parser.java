@@ -47,7 +47,7 @@ public class Parser {
             case ZERO :
             case NUM :
                 if(!problemDefined)
-                    Main.err("Problem not defined prior to first clause.", 24);
+                    ErrPrint.err("Problem not defined prior to first clause.", 24);
                 clause = clause();
                 if(clause != null)
                     this.clauses.add(clause);
@@ -67,24 +67,24 @@ public class Parser {
 
     private void problemLine() throws Exception {
         if(problemDefined)
-            Main.err("Problem line already defined", 20);
+            ErrPrint.err("Problem line already defined", 20);
         problemDefined = true;
 
         reader.eat(Symbol.PROBLEM);
         String line = "p ";
 
         if(!reader.check(Symbol.WORD))
-            Main.err("Problem line has no problem type.", 21);
+            ErrPrint.err("Problem line has no problem type.", 21);
 
         line += ((WordToken) reader.pop()).getString() + " ";
 
         if(!reader.check(Symbol.NUM))
-            Main.err("Problem line has no variable number defined.", 22);
+            ErrPrint.err("Problem line has no variable number defined.", 22);
 
         line += ((IntToken) reader.pop()).getValue() + " ";
 
         if (!reader.check(Symbol.NUM))
-            Main.err("Problem line has no clause number defined.", 23);
+            ErrPrint.err("Problem line has no clause number defined.", 23);
 
         line += ((IntToken) reader.pop()).getValue();
 
@@ -119,7 +119,7 @@ public class Parser {
             } else if (sym == Symbol.NEG) {
                 neg = true;
                 reader.pop();
-            } else Main.err("Char in clause No " + Long.toString(clauseNb), 31);
+            } else ErrPrint.err("Char in clause No " + Long.toString(clauseNb), 31);
 
             sym = reader.get().getSymbol();
         }

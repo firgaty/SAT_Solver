@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import parselib.Main;
+import util.ErrPrint;
 
 /**
  * AbstractAlgorithm
@@ -36,7 +37,7 @@ abstract public class AbstractAlgorithm {
             return clauses.getMostRepresented();
             break;
         default:
-            Main.err("Invalid Flag", 300);
+            ErrPrint.err("Invalid Flag", 300);
         }
     }
 }

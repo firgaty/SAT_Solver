@@ -3,9 +3,10 @@ package parselib;
 import java.io.BufferedWriter;
 import java.lang.ClassCastException;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.TreeSet;
 
-import algorithms.ClauseArray;
+import util.containers.ClauseArray;
+import util.containers.Clause;
 
 /**
  * Parser
@@ -18,14 +19,14 @@ public class Parser {
 
     protected long clauseNb;
 
-    protected ArrayList<HashSet<Integer>> clauses;
+    protected ClauseArray clauseArr;
 
     public Parser(LookAhead1 l, BufferedWriter bw) {
         this.bw = bw;
         this.reader = l;
         problemDefined = false;
         this.clauseNb = 0;
-        clauses = new ArrayList<>();
+        clauseArr = ClauseArray();
     }
 
     public void mainLoop() throws Exception{
@@ -38,7 +39,7 @@ public class Parser {
     public void blockLine() throws Exception {
         Token t = reader.get();
         Symbol sym = t.getSymbol();
-        HashSet<Integer> clause = null;
+        Clause clause = null;
 
         switch(sym) {
             case COMMENT : commentLine(); break;
@@ -50,7 +51,7 @@ public class Parser {
                     ErrPrint.err("Problem not defined prior to first clause.", 24);
                 clause = clause();
                 if(clause != null)
-                    this.clauses.add(clause);
+                    this.clauseArr.add(clause);
                 break;
             default : System.out.println("Token not recognized : " + t.toString());
 
@@ -92,10 +93,10 @@ public class Parser {
         bw.write(line);
     }
 
-    private HashSet<Integer> clause() throws Exception {
+    private Clause clause() throws Exception {
         clauseNb ++;
 
-        HashSet<Integer> array = new ArrayList<>();
+        Clause array = Clause();
 
         Symbol sym = reader.get().getSymbol();
 
@@ -132,7 +133,7 @@ public class Parser {
         return new Clause(array);
     }
 
-    public ClauseArray getClauses() {
-        return clauses;
+    public ClauseArray getClauseArray() {
+        return clauseArr;
     }
 }

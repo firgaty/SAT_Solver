@@ -28,6 +28,7 @@ public class Counter {
     public int decrement() {
         this.val--;
         if (val < 0)
+            ErrPrint.err("Counter under 0.", 501);
             
         return val;
     }

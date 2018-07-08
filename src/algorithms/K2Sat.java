@@ -1,14 +1,15 @@
 package algorithms;
 
 import java.util.ArrayList;
+import util.containers.*;
 
 public /**
  * K2Sat
  */
 public class K2Sat extends AbstractAlgorithm {
 
-    public K2Sat(ArrayList<ArrayList<Integer>> clauses, int varNb, int k_level) {
-        super(clauses, varNb, k_level);
+    public K2Sat(ClauseArray clauseArr, int varNb, int k_level) {
+        super(clauseArr, varNb, k_level);
 
         if(k_level > 2) {
             System.out.println("USage of the 2-SAT solver algorithm is impossible : k > 2;");
@@ -18,10 +19,10 @@ public class K2Sat extends AbstractAlgorithm {
 
     @Override
     public boolean solve() {
-        ArrayList<ArrayList<Integer>> clauses = this.clauses;
+        ClauseArray clauseArr = this.clauseArr;
 
-        while(clauses.size() > 0) {
-            while (clauses.size() > 0) {
+        while(clauseArr.size() > 0) {
+            while (clauseArr.size() > 0) {
                 Integer var = h(Flag.FirstUnique);
                 if(var == null) break;
                 if (var > 0) {
@@ -29,7 +30,7 @@ public class K2Sat extends AbstractAlgorithm {
                 } else {
                     values.put(-var, false);
                 }
-                if(!simplify(clauses, var, values.get(var)))
+                if(!simplify(clauseArr, var, values.get(var)))
                     return false;
             
             }
@@ -38,7 +39,7 @@ public class K2Sat extends AbstractAlgorithm {
         return false;
     }
 
-    protected boolean tree(ArrayList<ArrayList<Integer>> clauses, int var, boolean val) {
+    protected boolean tree(ArrayList<ArrayList<Integer>> clauseArr, int var, boolean val) {
         
     }
 }

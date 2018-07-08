@@ -8,6 +8,7 @@ import java.util.Map;
 import parselib.Main;
 import util.ErrPrint;
 import util.containers.*;
+import util.Counter;
 
 /**
  * AbstractAlgorithm
@@ -20,7 +21,7 @@ abstract public class AbstractAlgorithm {
         this.clauseArr = clauseArr;
     }
 
-    public AbstractAlgorithm(ArrayList<ArrayList<Integer>> clauseArr, HashMap<Integer, Boolean> values, HashMap<Integer, Counter> valuesCount, int varNb, int k_level) {
+    public AbstractAlgorithm(ClauseArray clauseArr, HashMap<Integer, Boolean> values, HashMap<Integer, Counter> valuesCount, int varNb, int k_level) {
         this.clauseArr = new ClauseArray(clauseArr, varNb, k_level);
     }
 
@@ -30,15 +31,14 @@ abstract public class AbstractAlgorithm {
         switch (flag) {
         case FirstUnique:
             return clauseArr.firstUnique();
-            break;
         case MostRepresentedUnique:
             return clauseArr.mostRepresentedUnique();
-            break;
         case MostRepresentedVar:
             return clauseArr.getMostRepresented();
-            break;
         default:
             ErrPrint.err("Invalid Flag", 300);
         }
+
+        return null;
     }
 }

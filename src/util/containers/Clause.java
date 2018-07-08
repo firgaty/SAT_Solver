@@ -2,7 +2,7 @@ package util.containers;
 
 import java.util.TreeSet;
 
-public /**
+/**
  * Clause
  */
 public class Clause extends TreeSet<Integer> {
@@ -12,15 +12,16 @@ public class Clause extends TreeSet<Integer> {
         super();
     }
 
-    public Clause(TreeSe<Integer> hs) {
+    public Clause(TreeSet<Integer> hs) {
         super(hs);
     }
 
     public boolean isAlwaysTrue() {
-        for(Integer i : this)
+        for(Integer i : this) {
             if(i > 0) return false;
             if(this.contains(-i))
                 return true;
+        }
         return false;
     }
 }

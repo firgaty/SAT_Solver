@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import util.Counter;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import parselib.Main;
 
-public /**
+/**
  * ClauseArray
  */
 public class ClauseArray extends ArrayList<Clause> {
@@ -57,12 +59,12 @@ public class ClauseArray extends ArrayList<Clause> {
     }
 
     public ClauseArray clone() {
-        ArrayList<Clause> clausesClone = new ArrayList<>();
+        ArrayList<Clause> clauseClone = new ArrayList<>();
 
         for (Clause c : this)
-            clauseClone.add(c.clone());
+            clauseClone.add((Clause) c.clone());
 
-        return new ClauseArray(clausesClone, varVal.clone(), varCount.clone(), varNb, k_level, sorted, counted);
+        return new ClauseArray(clauseClone, varNb, k_level, (HashMap<Integer, Boolean>) varVal.clone(), (HashMap<Integer, Counter>) varCount.clone(), sorted, counted, initialized);
     }
 
     public void initialize() {
@@ -85,9 +87,9 @@ public class ClauseArray extends ArrayList<Clause> {
             }
         }
 
+        mapVars();
         counted = true;
         this.k_level = max;
-        simplify(this, var, val);
         initialized = true;
     }
 
@@ -98,9 +100,12 @@ public class ClauseArray extends ArrayList<Clause> {
     }
 
     public boolean simplify(int var, boolean val) {
-        simplify(this, var, val);
+        return simplify(this, var, val);
     }
 
+    /**
+     * @return true if the obtained var configuration isn't unsat.
+     */
     public boolean simplify(ClauseArray clauses, int var, boolean val) {
         // clauses.getValuesCount().get(var).reset();
 
@@ -121,17 +126,17 @@ public class ClauseArray extends ArrayList<Clause> {
         return true;
     }
 
-    public resetVar(int var) {
+    public void resetVar(int var) {
         this.varVal.remove(var);
     }
 
-    public setVar(int var, Boolean val) {
+    public boolean setVar(int var, Boolean val) {
         if(!varExists(var)) {
             if(Main.getVerbose())
                 System.out.println("Value not contained.");
         } else
             varVal.replace(var, val);
-        simplify(var, val);
+        return simplify(var, val);
     }
 
     public boolean varExists(int var) {
@@ -152,11 +157,11 @@ public class ClauseArray extends ArrayList<Clause> {
         counted = true;
     }
 
-    protected incrementValue(int val) {
+    protected void incrementValue(int val) {
         incrementValue(val, varCount);
     }
 
-    protected incrementValue(int val, HashMap<Integer, Counter> map) {
+    protected void incrementValue(int val, HashMap<Integer, Counter> map) {
         if(!map.containsKey(val)) {
             map.put(val, new Counter(1));
         } else {
@@ -164,7 +169,6 @@ public class ClauseArray extends ArrayList<Clause> {
         }
     }
 
-    @Override
     public void sort() {
         this.sort((a, b) -> Integer.compare(a.size(), b.size()));
 
@@ -175,6 +179,8 @@ public class ClauseArray extends ArrayList<Clause> {
     }
 
     public Clause getSmallestClause() {
+        if (!initialized)
+            initialize();
         if (sorted)
             return this.get(0);
 
@@ -197,6 +203,8 @@ public class ClauseArray extends ArrayList<Clause> {
     }
 
     public Clause getBiggestClause() {
+        if (!initialized)
+            initialize();
         if (sorted)
             return this.get(this.size() - 1);
 
@@ -219,14 +227,18 @@ public class ClauseArray extends ArrayList<Clause> {
     }
 
     public int getMostRepresented() {
-        getMostRepresented(this.varCount);
+        return getMostRepresented(this.varCount);
     }
 
     public int getMostRepresented(HashMap<Integer, Counter> varCount) {
+        if (!initialized)
+            initialize();
+        if(!counted)
+            countValues();
         int max = 0;
-        int maxVal;
+        int maxVal = 0;
 
-        for (Map<K, V>.Entry<Integer, Counter> entry : this.varCount.entrySet()) {
+        for (Entry<Integer, Counter> entry : this.varCount.entrySet()) {
             if (entry.getValue().get() > max) {
                 max = entry.getValue().get();
                 maxVal = entry.getKey();
@@ -245,6 +257,8 @@ public class ClauseArray extends ArrayList<Clause> {
     }
 
     public int getMostRepresented(ArrayList<Integer> as, HashMap<Integer, Counter> varCount, boolean strictPosNeg) {
+        if (!initialized)
+            initialize();
         if (!counted)
             countValues();
 
@@ -266,16 +280,20 @@ public class ClauseArray extends ArrayList<Clause> {
     }
 
     public Integer firstUnique() {
+        if (!initialized)
+            initialize();
         if (!sorted)
             sort();
 
         for (Clause c : this)
             if (c.size() == 1)
-                return c.get(0);
+                return c.first();
         return null;
     }
 
     public Integer mostRepresentedUnique() {
+        if (!initialized)
+            initialize();
         if (!sorted)
             sort();
 
@@ -283,7 +301,7 @@ public class ClauseArray extends ArrayList<Clause> {
 
         for(Clause c : this) {
             if(c.size() > 1) break;
-            incrementValue(c.get(0), uniques);
+            incrementValue(c.first(), uniques);
         }
 
         return getMostRepresented(uniques);
@@ -319,6 +337,12 @@ public class ClauseArray extends ArrayList<Clause> {
         return varCount;
     }
 
+    public int getKLevel() {
+        if(!initialized) initialize();
+        if(!sorted) sort();
+        return this.get(this.size() - 1).size();
+    }
+
     public Clause remove(int index) {
         for(int i : this.get(index))
             this.varCount.get(i).decrement();
@@ -332,13 +356,11 @@ public class ClauseArray extends ArrayList<Clause> {
             return;
 
         for(Clause c : this)
-            for(int i = 0; i < c.size(); i ++)
-                if(c.get(i) == var)
-                    c.remove(i);
+            c.remove(var);
 
         varCount.get(var).reset();
         sorted = false;
-    } 
+    }
 
     @Override
     public boolean add(Clause c) {

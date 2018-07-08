@@ -14,6 +14,8 @@ import java.io.FileReader;
 import java.io.File;
 import java.util.ArrayList;
 
+import util.containers.*;
+import util.ErrPrint;
 import algorithms.*;
 
 public class Main {
@@ -103,7 +105,7 @@ public class Main {
             look = new LookAhead1(lexer);
             parser = new Parser(look, writer);
             parser.mainLoop();
-            ArrayList<ArrayList<Integer>> cl = parser.getClauses();
+            ClauseArray cl = parser.getClauseArray();
             
             // TODO : USE ALGORITHMS.
 

@@ -7,6 +7,7 @@ import java.util.TreeSet;
 
 import util.containers.ClauseArray;
 import util.containers.Clause;
+import util.ErrPrint;
 
 /**
  * Parser
@@ -26,7 +27,7 @@ public class Parser {
         this.reader = l;
         problemDefined = false;
         this.clauseNb = 0;
-        clauseArr = ClauseArray();
+        clauseArr = new ClauseArray();
     }
 
     public void mainLoop() throws Exception{
@@ -96,7 +97,7 @@ public class Parser {
     private Clause clause() throws Exception {
         clauseNb ++;
 
-        Clause array = Clause();
+        Clause array = new Clause();
 
         Symbol sym = reader.get().getSymbol();
 

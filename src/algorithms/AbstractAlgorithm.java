@@ -28,6 +28,8 @@ abstract public class AbstractAlgorithm {
     abstract public boolean solve();
     
     public Integer h(Flag flag) {
+        Integer i;
+
         switch (flag) {
         case FirstUnique:
             return clauseArr.firstUnique();
@@ -35,6 +37,12 @@ abstract public class AbstractAlgorithm {
             return clauseArr.mostRepresentedUnique();
         case MostRepresentedVar:
             return clauseArr.getMostRepresented();
+        case SmallestClause :
+            i = clauseArr.getSmallestClause().firstPos();
+            return i == null ? clauseArr.getSmallestClause().first() : i;
+        case BiggestClause :
+            i = clauseArr.getBiggestClause().firstPos();
+            return i == null ? clauseArr.getBiggestClause().first() : i;
         default:
             ErrPrint.err("Invalid Flag", 300);
         }

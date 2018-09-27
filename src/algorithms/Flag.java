@@ -1,5 +1,5 @@
 package algorithms;
 
 public enum Flag {
-    FirstUnique, MostRepresentedUnique, MostRepresentedVar;
+    FirstUnique, MostRepresentedUnique, MostRepresentedVar, SmallestClause, BiggestClause;
 }

@@ -16,12 +16,20 @@ public class Clause extends TreeSet<Integer> {
         super(hs);
     }
 
+    /**
+     * @return true if an element is present as pos and neg.
+     */
     public boolean isAlwaysTrue() {
-        for(Integer i : this) {
-            if(i > 0) return false;
-            if(this.contains(-i))
+        for (Integer i : this) {
+            if (i > 0)
+                return false;
+            if (this.contains(-i))
                 return true;
         }
         return false;
+    }
+
+    public Integer firstPos() {
+        return floor(1);
     }
 }

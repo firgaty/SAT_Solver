@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 
 import parselib.Main;
 
-/**
+/*
  * ClauseArray
  */
 public class ClauseArray extends ArrayList<Clause> {
@@ -47,7 +47,8 @@ public class ClauseArray extends ArrayList<Clause> {
         initialized = false;
     }
 
-    public ClauseArray(ArrayList<Clause> cl, int varNb, int k_level, HashMap<Integer, Boolean> varVal, HashMap<Integer, Counter> varCount, boolean sorted, boolean counted, boolean initialized) {
+    public ClauseArray(ArrayList<Clause> cl, int varNb, int k_level, HashMap<Integer, Boolean> varVal,
+            HashMap<Integer, Counter> varCount, boolean sorted, boolean counted, boolean initialized) {
         super(cl);
         this.varNb = varNb;
         this.k_level = k_level;
@@ -64,25 +65,28 @@ public class ClauseArray extends ArrayList<Clause> {
         for (Clause c : this)
             clauseClone.add((Clause) c.clone());
 
-        return new ClauseArray(clauseClone, varNb, k_level, (HashMap<Integer, Boolean>) varVal.clone(), (HashMap<Integer, Counter>) varCount.clone(), sorted, counted, initialized);
+        return new ClauseArray(clauseClone, varNb, k_level, (HashMap<Integer, Boolean>) varVal.clone(),
+                (HashMap<Integer, Counter>) varCount.clone(), sorted, counted, initialized);
     }
 
     public void initialize() {
-        if(initialized) return;
+        if (initialized)
+            return;
 
         varVal = new HashMap<>();
         varCount = new HashMap<>();
 
         int max = 0;
 
-        for(int i = 0; i < this.size(); i ++) {
-            if(this.get(i).isAlwaysTrue()) {
+        for (int i = 0; i < this.size(); i++) {
+            if (this.get(i).isAlwaysTrue()) {
                 this.remove(i);
-                i --;
+                i--;
                 continue;
             }
-            if(this.get(i).size() > max) max = this.get(i).size();
-            for(int j : this.get(i)) {
+            if (this.get(i).size() > max)
+                max = this.get(i).size();
+            for (int j : this.get(i)) {
                 incrementValue(j);
             }
         }
@@ -131,8 +135,8 @@ public class ClauseArray extends ArrayList<Clause> {
     }
 
     public boolean setVar(int var, Boolean val) {
-        if(!varExists(var)) {
-            if(Main.getVerbose())
+        if (!varExists(var)) {
+            if (Main.getVerbose())
                 System.out.println("Value not contained.");
         } else
             varVal.replace(var, val);
@@ -145,8 +149,8 @@ public class ClauseArray extends ArrayList<Clause> {
 
     protected void mapVars() {
         for (Clause c : this)
-            for (int i : c) 
-                if(!varVal.containsKey(i))
+            for (int i : c)
+                if (!varVal.containsKey(i))
                     varVal.put(i, null);
     }
 
@@ -162,7 +166,7 @@ public class ClauseArray extends ArrayList<Clause> {
     }
 
     protected void incrementValue(int val, HashMap<Integer, Counter> map) {
-        if(!map.containsKey(val)) {
+        if (!map.containsKey(val)) {
             map.put(val, new Counter(1));
         } else {
             map.get(val).increment();
@@ -179,6 +183,10 @@ public class ClauseArray extends ArrayList<Clause> {
     }
 
     public Clause getSmallestClause() {
+        return this.get(this.getSmallestClauseIndex());
+    }
+
+    public int getSmallestClauseIndex() {
         if (!initialized)
             initialize();
         if (sorted)
@@ -199,10 +207,10 @@ public class ClauseArray extends ArrayList<Clause> {
             printClause(this.get(index));
         }
 
-        return this.get(index);
+        return index;
     }
 
-    public Clause getBiggestClause() {
+    public int getBiggestClauseIndex() {
         if (!initialized)
             initialize();
         if (sorted)
@@ -223,7 +231,11 @@ public class ClauseArray extends ArrayList<Clause> {
             printClause(this.get(index));
         }
 
-        return this.get(index);
+        return index;
+    }
+
+    public Clause getBiggestClause() {
+        return this.get(this.getBiggestClauseIndex());
     }
 
     public int getMostRepresented() {
@@ -233,7 +245,7 @@ public class ClauseArray extends ArrayList<Clause> {
     public int getMostRepresented(HashMap<Integer, Counter> varCount) {
         if (!initialized)
             initialize();
-        if(!counted)
+        if (!counted)
             countValues();
         int max = 0;
         int maxVal = 0;
@@ -299,8 +311,9 @@ public class ClauseArray extends ArrayList<Clause> {
 
         HashMap<Integer, Counter> uniques = new HashMap<>();
 
-        for(Clause c : this) {
-            if(c.size() > 1) break;
+        for (Clause c : this) {
+            if (c.size() > 1)
+                break;
             incrementValue(c.first(), uniques);
         }
 
@@ -333,29 +346,32 @@ public class ClauseArray extends ArrayList<Clause> {
     public HashMap<Integer, Boolean> getVarVal() {
         return varVal;
     }
+
     public HashMap<Integer, Counter> getVarCount() {
         return varCount;
     }
 
     public int getKLevel() {
-        if(!initialized) initialize();
-        if(!sorted) sort();
+        if (!initialized)
+            initialize();
+        if (!sorted)
+            sort();
         return this.get(this.size() - 1).size();
     }
 
     public Clause remove(int index) {
-        for(int i : this.get(index))
+        for (int i : this.get(index))
             this.varCount.get(i).decrement();
-        
+
         sorted = false;
         return super.remove(index);
     }
 
     public void removeVar(int var) {
-        if(!varCount.containsKey(var))
+        if (!varCount.containsKey(var))
             return;
 
-        for(Clause c : this)
+        for (Clause c : this)
             c.remove(var);
 
         varCount.get(var).reset();
@@ -364,11 +380,11 @@ public class ClauseArray extends ArrayList<Clause> {
 
     @Override
     public boolean add(Clause c) {
-        if(c.isAlwaysTrue())
+        if (c.isAlwaysTrue())
             return false;
-        if(c.size() > k_level)
+        if (c.size() > k_level)
             k_level = c.size();
-        for(int i : c)
+        for (int i : c)
             this.varCount.get(i).decrement();
         return super.add(c);
     }
